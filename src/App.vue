@@ -7,14 +7,17 @@
                 language="javascript" />
         <Editor v-model="style_code"
                 language="css" />
-        <div class="out">
-            <pre><code>{{ entry_out }}</code></pre>
+        <div class="out"
+             style="grid-column: span 2;">
+            <Editor v-model="entry_out"
+                    read-only
+                    language="javascript" />
         </div>
-        <div class="out">
-            <pre><code>{{ css_out }}</code></pre>
-        </div>
-        <div class="out">
-            <pre><code></code></pre>
+        <div class="out"
+             style="grid-column: span 1;">
+            <Editor v-model="css_out"
+                    read-only
+                    language="css" />
         </div>
     </div>
 </template>
@@ -60,7 +63,7 @@ async function doCompile() {
         '/styles.css': style_code.value,
         '/index.js': `
             import View from './View.vue';
-            import Handler from './styles.css';
+            import Handler from './handler.js';
             export const view = View;
             export const handler = Handler;
         `.trim(),
@@ -85,7 +88,7 @@ async function doCompile() {
         const chunks = output.filter(i => i.type == 'chunk');
 
         entry_out.value = chunks[0].code;
-        css_out.value = assets[1]?.source.toString() || '';
+        css_out.value = assets[0]?.source.toString() || '';
     } catch (e) {
         error.value = String(e);
     }
@@ -108,13 +111,13 @@ watch(style_code, doCompile);
 
 .app {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 33.333% 33.333% 33.333%;
 }
 
 .out {
-    height: 400px;
-    background-color: black;
-    color: white;
+    min-height: 400px;
+    border-top: 2px dashed grey;
+    padding-top: 10px;
 }
 
 .message {

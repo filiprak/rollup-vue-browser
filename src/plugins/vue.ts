@@ -2,12 +2,9 @@ import type { Plugin } from "@rollup/browser";
 import {
     parse,
     compileScript,
-    compileTemplate,
 } from "@vue/compiler-sfc";
 
 export const vue = (): Plugin => {
-    const files = new Map<string, string>();
-
     return {
         name: "vue-browser",
 
@@ -21,30 +18,18 @@ export const vue = (): Plugin => {
                     ? importer.substring(0, importer.lastIndexOf("/"))
                     : "";
 
-                const resolved = normalizePath(`${base}/${source}`);
-
-                if (files.has(resolved)) {
-                    return resolved;
-                }
+                return normalizePath(`${base}/${source}`);
             }
 
-            if (files.has(source)) {
-                return source;
-            }
-
-            return null;
+            return normalizePath(source);
         },
 
-        load(id) {
+        async load(id) {
             if (!id.endsWith(".vue")) {
                 return null;
             }
 
-            const code = files.get(id);
-
-            if (!code) {
-                return null;
-            }
+            const code = await this.fs.readFile(id, { encoding: 'utf8' });
 
             const { descriptor, errors } = parse(code, {
                 filename: id,
@@ -68,51 +53,8 @@ export const vue = (): Plugin => {
                 script = "const __sfc__ = {};";
             }
 
-            let template = "";
-
-            if (descriptor.template) {
-                const compiled = compileTemplate({
-                    id: hash(id),
-                    filename: id,
-                    source: descriptor.template.content,
-                });
-
-                if (compiled.errors.length) {
-                    throw compiled.errors[0];
-                }
-
-                template = compiled.code;
-            }
-
-            return `
-${script}
-${template}
-
-__sfc__.render = render;
-
-export default __sfc__;
-`;
+            return `${script}\nexport default __sfc__;`;
         },
-
-        api: {
-            setFile(id: string, source: string) {
-                files.set(normalizePath(id), source);
-            },
-
-            deleteFile(id: string) {
-                files.delete(normalizePath(id));
-            },
-
-            getFile(id: string) {
-                return files.get(normalizePath(id));
-            },
-        },
-    } as Plugin & {
-        api: {
-            setFile(id: string, source: string): void;
-            deleteFile(id: string): void;
-            getFile(id: string): string | undefined;
-        };
     };
 };
 
