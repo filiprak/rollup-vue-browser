@@ -24,6 +24,7 @@ import { Volume } from 'memfs-browser';
 import { css } from './plugins/css';
 import { onMounted, ref, watch } from 'vue';
 import Editor from './Editor.vue';
+import { vue } from './plugins/vue.ts';
 
 const view_code = ref(`
 <template>
@@ -75,6 +76,7 @@ async function doCompile() {
             },
             plugins: [
                 css({ chunkName: 'index.css' }),
+                vue(),
             ],
         });
 

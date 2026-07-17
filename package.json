@@ -21,6 +21,7 @@
   "dependencies": {
     "@rollup/browser": "^4.62.2",
     "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/compiler-sfc": "^3.5.40",
     "ace-builds": "^1.44.0",
     "buffer": "^6.0.3",
     "memfs": "^4.64.0",
