@@ -1,0 +1,27 @@
+{
+  "name": "rollup-vue-browser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.13.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@rollup/browser": "^4.62.2",
+    "buffer": "^6.0.3",
+    "memfs": "^4.64.0",
+    "memfs-browser": "^3.5.10302",
+    "vite": "^8.1.5"
+  }
+}
