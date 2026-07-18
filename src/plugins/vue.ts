@@ -5,7 +5,7 @@ import {
 } from "@vue/compiler-sfc";
 import { compileTs } from "./esm";
 
-export const vue = (): Plugin => {
+export const vue = (options?: { ssr?: boolean }): Plugin => {
     return {
         name: "vue-browser",
 
@@ -47,6 +47,8 @@ export const vue = (): Plugin => {
                     id: hash(id),
                     inlineTemplate: true,
                     genDefaultAs: "__sfc__",
+                    isProd: true,
+                    templateOptions: { ssr: options?.ssr, },
                 });
 
                 script = compiled.content;

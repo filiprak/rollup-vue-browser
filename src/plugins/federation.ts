@@ -2,6 +2,8 @@ import type { Plugin } from "@rollup/browser";
 import { parse } from "acorn";
 import { simple as walk } from "acorn-walk";
 import MagicString from "magic-string";
+// @ts-expect-error
+import runtimeSource from './federation-runtime.mjs?raw';
 
 function isExternalImport(source: string) {
     return (
@@ -11,9 +13,22 @@ function isExternalImport(source: string) {
     );
 }
 
-export const federation = (): Plugin => {
+export const federation = (options?: { ssr?: boolean }): Plugin => {
     return {
         name: "federation",
+
+        resolveId(id) {
+            if (id === '@ikol/federation') {
+                return '\0@ikol/federation';
+            }
+        },
+
+        load(id) {
+            if (id === '\0@ikol/federation') {
+                return { code: runtimeSource.replace('\'<REPLACE_SHARED_MAP>\'', '{}') };
+            }
+            return null;
+        },
 
         transform(code, id) {
             const ast = parse(code, {
@@ -31,7 +46,9 @@ export const federation = (): Plugin => {
                         return;
                     }
 
-                    const importExpr = `await importShared(${JSON.stringify(source)})`;
+                    const importExpr = options?.ssr ?
+                        `requireShared(${JSON.stringify(source)})` :
+                        `await importShared(${JSON.stringify(source)})`;
 
                     let replacement: string | undefined;
 
@@ -71,6 +88,8 @@ export const federation = (): Plugin => {
 
             if (!s.hasChanged()) {
                 return null;
+            } else {
+                s.prepend(`import { importShared, requireShared } from '@ikol/federation';`)
             }
 
             return {

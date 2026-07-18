@@ -14,11 +14,13 @@
              style="grid-column: span 2;">
             <Editor v-model="entry_out"
                     show_minify
+                    show_ssr
                     height="800px"
                     title="remoteEntry.js"
                     read-only
                     theme="dracula"
                     v-model:minify="minify_js"
+                    v-model:ssr="ssr"
                     language="javascript" />
         </div>
         <div class="out"
@@ -42,8 +44,10 @@ import { vue } from './plugins/vue.ts';
 import { esm } from './plugins/esm.ts';
 import { federation } from './plugins/federation.ts';
 import { minifier } from './plugins/minifier.ts';
+import { core } from './plugins/core.ts';
 
 const minify_js = ref(true);
+const ssr = ref(false);
 
 const view_code = ref(`
 <template>
@@ -110,15 +114,16 @@ async function doCompile() {
                 entryFileNames: 'remoteEntry.js',
             },
             plugins: [
-                vue(),
+                core({ ssr: ssr.value }),
                 css({ chunkName: 'index.css' }),
-                esm(),
-                federation(),
-                minifier(minify_js.value),
+                vue({ ssr: ssr.value }),
+                esm({ ssr: ssr.value }),
+                federation({ ssr: ssr.value }),
+                minifier({ ssr: ssr.value, enabled: minify_js.value }),
             ],
         });
 
-        const { output } = await bundle.generate({ format: 'esm' });
+        const { output } = await bundle.generate({ format: ssr.value ? 'cjs' : 'esm' });
         const assets = output.filter(i => i.type == 'asset');
         const chunks = output.filter(i => i.type == 'chunk');
 
@@ -137,6 +142,7 @@ watch(view_code, doCompile);
 watch(handler_code, doCompile);
 watch(style_code, doCompile);
 watch(minify_js, doCompile);
+watch(ssr, doCompile);
 </script>
 <style scoped>
 :global(body),

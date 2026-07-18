@@ -2,15 +2,27 @@
     <div class="editor">
         <div class="title">
             <span>{{ title }}</span>
-            <div v-if="show_minify"
-                 style="line-height: 1; display: flex; align-items: center; gap: 5px">
-                <label for="minify"
-                       style="font-size: 10px;">Minify</label>
-                <input id="minify"
-                       type="checkbox"
-                       style="margin: 0;"
-                       :checked="minify"
-                       @change="emit('update:minify', $event.target.checked)">
+            <div style="display: flex; gap: 10px">
+                <div v-if="show_ssr"
+                     style="line-height: 1; display: flex; align-items: center; gap: 5px">
+                    <label for="ssr"
+                           style="font-size: 10px;">SSR</label>
+                    <input id="ssr"
+                           type="checkbox"
+                           style="margin: 0;"
+                           :checked="ssr"
+                           @change="emit('update:ssr', $event.target.checked)">
+                </div>
+                <div v-if="show_minify"
+                     style="line-height: 1; display: flex; align-items: center; gap: 5px">
+                    <label for="minify"
+                           style="font-size: 10px;">Minify</label>
+                    <input id="minify"
+                           type="checkbox"
+                           style="margin: 0;"
+                           :checked="minify"
+                           @change="emit('update:minify', $event.target.checked)">
+                </div>
             </div>
         </div>
         <div ref="editor"
@@ -46,7 +58,15 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    show_ssr: {
+        type: Boolean,
+        default: false,
+    },
     minify: {
+        type: Boolean,
+        default: false,
+    },
+    ssr: {
         type: Boolean,
         default: false,
     },
@@ -72,7 +92,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(["update:modelValue", "update:minify"]);
+const emit = defineEmits(["update:modelValue", "update:minify", "update:ssr"]);
 
 const editor = ref();
 let aceEditor;
