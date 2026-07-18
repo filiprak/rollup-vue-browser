@@ -38,6 +38,7 @@ import { onMounted, ref, watch } from 'vue';
 import Editor from './Editor.vue';
 import { vue } from './plugins/vue.ts';
 import { esm } from './plugins/esm.ts';
+import { federation } from './plugins/federation.ts';
 
 const view_code = ref(`
 <template>
@@ -107,6 +108,7 @@ async function doCompile() {
                 vue(),
                 css({ chunkName: 'index.css' }),
                 esm(),
+                federation(),
             ],
         });
 
