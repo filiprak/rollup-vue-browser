@@ -4,7 +4,7 @@
         <Editor v-model="view_code"
                 language="html" />
         <Editor v-model="handler_code"
-                language="javascript" />
+                language="typescript" />
         <Editor v-model="style_code"
                 language="css" />
         <div class="out"
@@ -28,22 +28,27 @@ import { css } from './plugins/css';
 import { onMounted, ref, watch } from 'vue';
 import Editor from './Editor.vue';
 import { vue } from './plugins/vue.ts';
+import { esm } from './plugins/esm.ts';
 
 const view_code = ref(`
 <template>
   <h1>{{ msg }}</h1>
   <input v-model="msg" />
 </template>
-<script setup>
+<script setup lang="ts">
 import './styles.css';
 import { ref } from 'vue'
 
-const msg = ref('Hello World!')
+const msg = ref<string>('Hello World!')
 \<\/script>
 `.trim());
 
 const handler_code = ref(`
-export default class MyHandler extends IkAppHandler { }
+export default class MyHandler extends IkAppHandler {
+    async load() {
+        const id: number = 77;
+    }
+}
 `.trim());
 
 const style_code = ref(`
@@ -59,11 +64,11 @@ async function doCompile() {
 
     const vol = Volume.fromJSON({
         '/View.vue': view_code.value,
-        '/handler.js': handler_code.value,
+        '/handler.ts': handler_code.value,
         '/styles.css': style_code.value,
-        '/index.js': `
+        '/index.ts': `
             import View from './View.vue';
-            import Handler from './handler.js';
+            import Handler from './handler.ts';
             export const view = View;
             export const handler = Handler;
         `.trim(),
@@ -71,15 +76,16 @@ async function doCompile() {
 
     try {
         const bundle = await rollup({
-            input: './index.js',
+            input: './index.ts',
             // @ts-expect-error
             fs: vol.promises,
             output: {
                 entryFileNames: 'remoteEntry.js',
             },
             plugins: [
-                css({ chunkName: 'index.css' }),
                 vue(),
+                css({ chunkName: 'index.css' }),
+                esm(),
             ],
         });
 

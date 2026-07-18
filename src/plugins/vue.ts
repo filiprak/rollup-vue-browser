@@ -3,6 +3,7 @@ import {
     parse,
     compileScript,
 } from "@vue/compiler-sfc";
+import { compileTs } from "./esm";
 
 export const vue = (): Plugin => {
     return {
@@ -51,6 +52,11 @@ export const vue = (): Plugin => {
                 script = compiled.content;
             } else {
                 script = "const __sfc__ = {};";
+            }
+
+            if (descriptor.scriptSetup?.lang == 'ts') {
+                const result = await compileTs(id + '.ts', script);
+                script = result.code;
             }
 
             return `${script}\nexport default __sfc__;`;
