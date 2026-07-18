@@ -74,7 +74,7 @@ export const federation = (): Plugin => {
             }
 
             return {
-                code: s.toString(),
+                code: `function importShared () {}\n\n${s.toString()}`,
             };
         },
     };

@@ -27,6 +27,15 @@ export async function compileTs(id: string, code: string) {
     });
 }
 
+export async function minify(code: string) {
+    await initEsbuild();
+    return esbuild.transform(code, {
+        format: "esm",
+        target: "esnext",
+        minify: true,
+    });
+}
+
 export const esm = (): Plugin => {
     return {
         name: "esbuild-browser",

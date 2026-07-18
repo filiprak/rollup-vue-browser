@@ -13,10 +13,12 @@
         <div class="out"
              style="grid-column: span 2;">
             <Editor v-model="entry_out"
+                    show_minify
                     height="800px"
                     title="remoteEntry.js"
                     read-only
                     theme="dracula"
+                    v-model:minify="minify_js"
                     language="javascript" />
         </div>
         <div class="out"
@@ -39,6 +41,9 @@ import Editor from './Editor.vue';
 import { vue } from './plugins/vue.ts';
 import { esm } from './plugins/esm.ts';
 import { federation } from './plugins/federation.ts';
+import { minifier } from './plugins/minifier.ts';
+
+const minify_js = ref(true);
 
 const view_code = ref(`
 <template>
@@ -109,6 +114,7 @@ async function doCompile() {
                 css({ chunkName: 'index.css' }),
                 esm(),
                 federation(),
+                minifier(minify_js.value),
             ],
         });
 
@@ -130,6 +136,7 @@ onMounted(() => {
 watch(view_code, doCompile);
 watch(handler_code, doCompile);
 watch(style_code, doCompile);
+watch(minify_js, doCompile);
 </script>
 <style scoped>
 :global(body),

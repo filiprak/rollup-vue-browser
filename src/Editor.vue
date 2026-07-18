@@ -1,6 +1,18 @@
 <template>
     <div class="editor">
-        <div class="title">{{ title }}</div>
+        <div class="title">
+            <span>{{ title }}</span>
+            <div v-if="show_minify"
+                 style="line-height: 1; display: flex; align-items: center; gap: 5px">
+                <label for="minify"
+                       style="font-size: 10px;">Minify</label>
+                <input id="minify"
+                       type="checkbox"
+                       style="margin: 0;"
+                       :checked="minify"
+                       @change="emit('update:minify', $event.target.checked)">
+            </div>
+        </div>
         <div ref="editor"
              :style="{ height }"
              class="ace-editor">
@@ -30,6 +42,14 @@ const props = defineProps({
         type: String,
         default: "",
     },
+    show_minify: {
+        type: Boolean,
+        default: false,
+    },
+    minify: {
+        type: Boolean,
+        default: false,
+    },
     language: {
         type: String,
         default: "javascript",
@@ -52,7 +72,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "update:minify"]);
 
 const editor = ref();
 let aceEditor;
@@ -125,5 +145,7 @@ onBeforeUnmount(() => {
 
 .title {
     padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
 }
 </style>
