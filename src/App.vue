@@ -2,20 +2,29 @@
     <div :class="{ 'message': true, 'error': !!error }">{{ error ?? 'No compile errors' }}</div>
     <div class="app">
         <Editor v-model="view_code"
+                title="View.vue"
                 language="html" />
         <Editor v-model="handler_code"
+                title="handler.ts"
                 language="typescript" />
         <Editor v-model="style_code"
+                title="styles.css"
                 language="css" />
         <div class="out"
              style="grid-column: span 2;">
             <Editor v-model="entry_out"
+                    height="800px"
+                    title="remoteEntry.js"
                     read-only
+                    theme="dracula"
                     language="javascript" />
         </div>
         <div class="out"
              style="grid-column: span 1;">
             <Editor v-model="css_out"
+                    height="800px"
+                    theme="dracula"
+                    title="index.css"
                     read-only
                     language="css" />
         </div>
@@ -32,27 +41,39 @@ import { esm } from './plugins/esm.ts';
 
 const view_code = ref(`
 <template>
-  <h1>{{ msg }}</h1>
-  <input v-model="msg" />
+    <div class="my-app">
+        <div v-for="p in handler.products.value">
+            {{ p.name }}
+        </div>
+    </div>
 </template>
 <script setup lang="ts">
 import './styles.css';
 import { ref } from 'vue'
+import { useAppHandler } from "@ikol/website/core";
 
-const msg = ref<string>('Hello World!')
+const handler = useAppHandler();
 \<\/script>
 `.trim());
 
 const handler_code = ref(`
+import { ref } from "vue";
+import { IkAppHandler, usePrefetch } from "@ikol/website/core";
+import { IkApiProducts } from "@ikol/website/api";
+
 export default class MyHandler extends IkAppHandler {
+    products = ref([]);
+
     async load() {
-        const id: number = 77;
+        const { data, error } = await usePrefetch('my-data', () => {
+            return IkApiProducts.list();
+        });
     }
 }
 `.trim());
 
 const style_code = ref(`
-body { color: red }
+.my-app { color: red }
 `.trim());
 
 const entry_out = ref('');
@@ -113,6 +134,7 @@ watch(style_code, doCompile);
 :global(html) {
     padding: 0;
     margin: 0;
+    font-family: monospace;
 }
 
 .app {
@@ -121,9 +143,8 @@ watch(style_code, doCompile);
 }
 
 .out {
-    min-height: 400px;
+    min-height: 600px;
     border-top: 2px dashed grey;
-    padding-top: 10px;
 }
 
 .message {

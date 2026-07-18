@@ -1,6 +1,11 @@
 <template>
-    <div ref="editor"
-         class="ace-editor"></div>
+    <div class="editor">
+        <div class="title">{{ title }}</div>
+        <div ref="editor"
+             :style="{ height }"
+             class="ace-editor">
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -33,6 +38,14 @@ const props = defineProps({
         type: String,
         default: "monokai",
     },
+    title: {
+        type: String,
+        default: 'file.js'
+    },
+    height: {
+        type: String,
+        default: '400px'
+    },
     readOnly: {
         type: Boolean,
         default: false,
@@ -54,8 +67,8 @@ onMounted(() => {
         enableBasicAutocompletion: true,
         enableLiveAutocompletion: true,
         enableSnippets: true,
-        fontSize: 14,
-        tabSize: 2,
+        fontSize: 12,
+        tabSize: 4,
         useSoftTabs: true,
         showPrintMargin: false,
         wrap: true,
@@ -108,6 +121,9 @@ onBeforeUnmount(() => {
 <style scoped>
 .ace-editor {
     width: 100%;
-    height: 400px;
+}
+
+.title {
+    padding: 5px 10px;
 }
 </style>
