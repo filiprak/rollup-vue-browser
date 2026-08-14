@@ -4,6 +4,7 @@ import { simple as walk } from "acorn-walk";
 import MagicString from "magic-string";
 // @ts-expect-error
 import runtimeSource from './federation-runtime.mjs?raw';
+// @ts-expect-error
 import vitePreloadSource from './vite-preload.mjs?raw';
 
 function isExternalImport(source: string) {
