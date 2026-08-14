@@ -4,6 +4,7 @@ import { simple as walk } from "acorn-walk";
 import MagicString from "magic-string";
 // @ts-expect-error
 import runtimeSource from './federation-runtime.mjs?raw';
+import vitePreloadSource from './vite-preload.mjs?raw';
 
 function isExternalImport(source: string) {
     return (
@@ -21,11 +22,17 @@ export const federation = (options?: { ssr?: boolean }): Plugin => {
             if (id === '@ikol/federation') {
                 return '\0@ikol/federation';
             }
+            if (id === 'vite-preload') {
+                return '\0vite-preload';
+            }
         },
 
         load(id) {
             if (id === '\0@ikol/federation') {
                 return { code: runtimeSource.replace('\'<REPLACE_SHARED_MAP>\'', '{}') };
+            }
+            if (id === '\0vite-preload') {
+                return { code: vitePreloadSource };
             }
             return null;
         },
@@ -85,6 +92,17 @@ export const federation = (options?: { ssr?: boolean }): Plugin => {
                     s.overwrite(node.start, node.end, replacement);
                 },
             });
+            const info = this.getModuleInfo(id);
+            if (info?.isEntry) {
+                if (!options?.ssr) {
+                    s.prepend(`import { __vitePreload } from 'vite-preload';`)
+                }
+                s.append(`const __federation_manifest__ = { entry_css: ['index.css'] };\n`)
+                if (!options?.ssr) {
+                    s.append(`await __vitePreload(()=>Promise.resolve({}), __federation_manifest__.entry_css);\n`);
+                }
+                s.append(`export { __federation_manifest__ };\n`);
+            }
 
             if (!s.hasChanged()) {
                 return null;

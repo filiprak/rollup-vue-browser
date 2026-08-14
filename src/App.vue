@@ -50,7 +50,7 @@ import { federation } from './plugins/federation.ts';
 import { minifier } from './plugins/minifier.ts';
 import { core } from './plugins/core.ts';
 
-const minify_js = ref(true);
+const minify_js = ref(false);
 const ssr = ref(false);
 
 const view_code = ref(`
