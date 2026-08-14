@@ -50,13 +50,13 @@ import { federation } from './plugins/federation.ts';
 import { minifier } from './plugins/minifier.ts';
 import { core } from './plugins/core.ts';
 
-const minify_js = ref(false);
+const minify_js = ref(true);
 const ssr = ref(false);
 
 const view_code = ref(`
 <template>
     <div class="my-app">
-        <div v-for="p in handler.products.value">
+        <div v-for="p in handler.products.value" class="product">
             {{ p.name }}
         </div>
     </div>
@@ -92,7 +92,17 @@ export default class MyHandler extends IkAppHandler {
 `.trim());
 
 const style_code = ref(`
-.my-app { color: red }
+.my-app {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 30px;
+}
+
+.product {
+    border: 1px solid red;
+    padding: 15px;
+}
 `.trim());
 
 const index_code = ref(`
