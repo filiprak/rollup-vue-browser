@@ -42,7 +42,7 @@ export async function compileTs(id: string, code: string, ssr?: boolean) {
 export async function minify(code: string, ssr?: boolean) {
     await initEsbuild();
     return esbuild.transform(code, {
-        format: "esm",
+        format: ssr ? "cjs" : "esm",
         target: ssr ? target_web : target_ssr,
         minify: true,
     });
