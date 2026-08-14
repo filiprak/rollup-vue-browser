@@ -7,16 +7,20 @@
         <Editor v-model="handler_code"
                 title="handler.ts"
                 language="typescript" />
+        <Editor v-model="index_code"
+                title="index.ts"
+                language="typescript" />
         <Editor v-model="style_code"
                 title="styles.css"
-                language="css" />
+                language="css"
+                height="800px" />
         <div class="out"
-             style="grid-column: span 2;">
+             style="grid-column: span 1;">
             <Editor v-model="entry_out"
                     show_minify
                     show_ssr
                     height="800px"
-                    title="remoteEntry.js"
+                    title="built: remoteEntry.js"
                     read-only
                     theme="dracula"
                     v-model:minify="minify_js"
@@ -28,7 +32,7 @@
             <Editor v-model="css_out"
                     height="800px"
                     theme="dracula"
-                    title="index.css"
+                    title="built: index.css"
                     read-only
                     language="css" />
         </div>
@@ -68,22 +72,34 @@ const handler = useAppHandler();
 
 const handler_code = ref(`
 import { ref } from "vue";
-import { IkAppHandler, usePrefetch } from "@ikol/website/core";
+import { IkAppHandler, usePrefetch, useWebpage } from "@ikol/website/core";
 import { IkApiProducts } from "@ikol/website/api";
 
 export default class MyHandler extends IkAppHandler {
     products = ref([]);
 
     async load() {
+        const webpage = useWebpage();
         const { data, error } = await usePrefetch('my-data', () => {
-            return IkApiProducts.list();
+            return IkApiProducts().list({
+                portal_only: true,
+                customer_code: webpage.getCustomerCode(),
+            });
         });
+        this.products.value = data.products;
     }
 }
 `.trim());
 
 const style_code = ref(`
 .my-app { color: red }
+`.trim());
+
+const index_code = ref(`
+import View from './View.vue';
+import Handler from './handler.ts';
+export const view = View;
+export const handler = Handler;
 `.trim());
 
 const entry_out = ref('');
@@ -97,12 +113,7 @@ async function doCompile() {
         '/View.vue': view_code.value,
         '/handler.ts': handler_code.value,
         '/styles.css': style_code.value,
-        '/index.ts': `
-            import View from './View.vue';
-            import Handler from './handler.ts';
-            export const view = View;
-            export const handler = Handler;
-        `.trim(),
+        '/index.ts': index_code.value,
     });
 
     try {
@@ -141,6 +152,7 @@ onMounted(() => {
 watch(view_code, doCompile);
 watch(handler_code, doCompile);
 watch(style_code, doCompile);
+watch(index_code, doCompile);
 watch(minify_js, doCompile);
 watch(ssr, doCompile);
 </script>
@@ -160,6 +172,7 @@ watch(ssr, doCompile);
 .out {
     min-height: 600px;
     border-top: 2px dashed grey;
+    border-left: 2px dashed grey;
 }
 
 .message {
